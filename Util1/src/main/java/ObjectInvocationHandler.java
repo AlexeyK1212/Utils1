@@ -39,11 +39,8 @@ public class ObjectInvocationHandler  implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
         Method method1 = object1.getClass().getDeclaredMethod(method.getName(), method.getParameterTypes());
+        Object result;
 
-
-        // Проверка на то что метод помечен как Mutator
-        if (method1.isAnnotationPresent(Mutator.class))
-            return method.invoke(object1, args);
 
 
         //Проверка на то что метод помечен как Cache
@@ -51,17 +48,18 @@ public class ObjectInvocationHandler  implements InvocationHandler {
             String currentState = StateOfObject(object1,method);
 
             if (!cache.containsKey(currentState) ) {
-                //если кэша нет, то выполняем метод и результат сохраняем в кэш
-                Object result = method.invoke(object1, args);
-                cache.put(currentState, new ObjectAndTimeSaver( result, System.currentTimeMillis(),method1.getAnnotation(Cache.class).value()) );
-                return result;
-            } else {
-                // если кэш есть, то просто возвращаем кэш
-                return cache.get(currentState).obj;
+                //если кэша нет, то выполняем метод и результат сохраняем в кэш потом
+                result = method.invoke(object1, args);
+           } else {
+                // если кэш есть, то просто возвращаем кэш и продлеваем время жизни потом
+                result=cache.get(currentState).obj;
             }
+            //тут сохраняем кэш или обновляем время
+            cache.put(currentState, new ObjectAndTimeSaver( result, System.currentTimeMillis(),method1.getAnnotation(Cache.class).value()) );
+            return result;
         }
 
-        // Если метод не cached и не mutator
+        // Если метод не cached
         return method.invoke(object1, args);
     }
 
