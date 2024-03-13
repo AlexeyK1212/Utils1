@@ -20,13 +20,14 @@ class UtilsTest {
         Fractionable num = ut.cache(fr);
 
         //кэш был пустой значение посчитается
+        //Запущен поток для удаления устаревших значений
         num.setNum(5);
         assertEquals(num.doubleValue (),2.5);
         assertEquals(outContent.toString().replaceAll("[\n\r]",""),"invoke double value");
         outContent.reset();
 
         //кэш не пустой, но этого значения там нет, значение посчитается
-        //устаревших значений в кэше пока нет
+
         num.setNum(1);
         assertEquals(num.doubleValue (),0.5);
         assertEquals(outContent.toString().replaceAll("[\n\r]",""),"invoke double value");
@@ -34,23 +35,19 @@ class UtilsTest {
 
 
         //кэш не пустой и нужное значение там есть, метод не выполнится, значение берется из кэша
-        //устаревших значений в кэше пока нет
         num.setNum(5);
         assertEquals(num.doubleValue (),2.5);
         assertEquals(outContent.toString().replaceAll("[\n\r]",""),"");
         outContent.reset();
 
-        //ждем 5 секунд
-        sleep(5000);
         //кэш не пустой и нужное значение там есть, метод не выполнится, значение берется из кэша
-        //Запущен поток для удаления устаревших значений
         num.setNum(1);
         assertEquals(num.doubleValue (),0.5);
         assertEquals(outContent.toString().replaceAll("[\n\r]",""),"");
         outContent.reset();
 
-        //ждем 5 секунд
-        sleep(5000);
+        //ждем 10 секунд
+        sleep(10000);
 
         //кэш теперь пустой Удалены устаревшие значения
         //значение посчитается
